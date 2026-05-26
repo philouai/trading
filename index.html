@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trading Dashboard — Systemic Trading</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">PT</div>
+      <div>
+        <h1>Trading Dashboard</h1>
+        <p class="brand-sub">Systemic · tier-based · emotion-free</p>
+      </div>
+    </div>
+    <div class="header-status">
+      <span class="sync-status" id="sync-status">
+        <span class="sync-dot"></span>
+        <span id="sync-text">Local only</span>
+      </span>
+      <button class="btn-icon" id="settings-btn" title="Settings">⚙</button>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="check">Green light</button>
+    <button class="tab" data-tab="log">Log trade</button>
+    <button class="tab" data-tab="stats">Statistics</button>
+    <button class="tab" data-tab="history">History</button>
+    <button class="tab" data-tab="plan">Plan</button>
+  </nav>
+</header>
+
+<main class="main">
+
+<!-- GREEN LIGHT TAB -->
+<section class="tab-content active" id="tab-check">
+  <div class="page-header">
+    <h2>Pre-trade green light</h2>
+    <div class="status-light status-red" id="gl-status">
+      <span class="status-dot"></span>
+      <span id="gl-status-text">RED — do not trade</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Setup tier</p>
+    <div class="tier-row">
+      <button class="tier-btn" data-tier="1" onclick="GL.setTier(1)">
+        <div class="tier-name">Tier 1</div>
+        <div class="tier-desc">3-tap reversal at historical level</div>
+      </button>
+      <button class="tier-btn" data-tier="2" onclick="GL.setTier(2)">
+        <div class="tier-name">Tier 2</div>
+        <div class="tier-desc">2nd tap reversal at zone</div>
+      </button>
+      <button class="tier-btn" data-tier="3" onclick="GL.setTier(3)">
+        <div class="tier-name">Tier 3</div>
+        <div class="tier-desc">1H break + 5M retest</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Structure</p>
+    <div id="check-structure" class="check-list"></div>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Timing & context</p>
+    <div id="check-timing" class="check-list"></div>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Confirmation</p>
+    <div id="check-confirm" class="check-list"></div>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Risk & state</p>
+    <div id="check-risk" class="check-list"></div>
+  </div>
+
+  <div class="summary" id="gl-summary">Select a tier and complete all checks to unlock the entry.</div>
+
+  <div class="action-row">
+    <button class="btn-secondary" onclick="GL.reset()">↻ Reset</button>
+    <button class="btn-primary" id="gl-go-btn" disabled onclick="GL.proceed()">✓ Green light — proceed to log</button>
+  </div>
+</section>
+
+<!-- LOG TRADE TAB -->
+<section class="tab-content" id="tab-log">
+  <div class="page-header">
+    <h2>Log a trade</h2>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Date and instrument</p>
+    <div class="form-row">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="field">
+        <label>Instrument</label>
+        <select id="f-instrument">
+          <option>XAUUSD</option>
+          <option>GBPJPY</option>
+          <option>BTCUSD</option>
+          <option>USDJPY</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Setup tier</p>
+    <div class="tier-row">
+      <button class="tier-btn" data-log-tier="1" onclick="Log.setTier(1)">
+        <div class="tier-name">Tier 1</div>
+      </button>
+      <button class="tier-btn" data-log-tier="2" onclick="Log.setTier(2)">
+        <div class="tier-name">Tier 2</div>
+      </button>
+      <button class="tier-btn" data-log-tier="3" onclick="Log.setTier(3)">
+        <div class="tier-name">Tier 3</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Trade details</p>
+    <div class="form-row-3">
+      <div class="field">
+        <label>Direction</label>
+        <select id="f-direction">
+          <option>Long</option>
+          <option>Short</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Standard level</label>
+        <input type="text" id="f-level" placeholder="e.g. 4580">
+      </div>
+      <div class="field">
+        <label>Session</label>
+        <select id="f-session">
+          <option>London</option>
+          <option>NY</option>
+          <option>Asia</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row-3">
+      <div class="field">
+        <label>Tap count</label>
+        <select id="f-tap">
+          <option value="2">2nd tap</option>
+          <option value="3">3rd tap</option>
+          <option value="4">4th+ tap</option>
+          <option value="0">Retest after break</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Risk type</label>
+        <select id="f-risk">
+          <option value="base">Base 1R</option>
+          <option value="compound">Reinvested</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>R achieved</label>
+        <input type="number" id="f-r" step="0.1" placeholder="3.0 or -1">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Result and notes</p>
+    <div class="result-row">
+      <button class="result-btn" data-result="win" onclick="Log.setResult('win')">Win</button>
+      <button class="result-btn" data-result="loss" onclick="Log.setResult('loss')">Loss</button>
+      <button class="result-btn" data-result="be" onclick="Log.setResult('be')">Breakeven</button>
+    </div>
+    <div class="field" style="margin-top: 12px;">
+      <label>System followed exactly?</label>
+      <select id="f-system">
+        <option value="yes">Yes — all rules followed</option>
+        <option value="partial">Partial — broke 1-2 rules</option>
+        <option value="no">No — broke multiple rules</option>
+      </select>
+    </div>
+    <div class="field" style="margin-top: 10px;">
+      <label>Emotion at entry</label>
+      <select id="f-emotion">
+        <option>Calm</option>
+        <option>Confident</option>
+        <option>Rushed</option>
+        <option>Uncertain</option>
+        <option>Revenge</option>
+      </select>
+    </div>
+    <div class="field" style="margin-top: 10px;">
+      <label>Notes (optional)</label>
+      <textarea id="f-notes" rows="2" placeholder="What did you learn from this trade?"></textarea>
+    </div>
+  </div>
+
+  <button class="btn-primary submit-btn" id="submit-btn" onclick="Log.save()" disabled>Save trade to journal</button>
+</section>
+
+<!-- STATISTICS TAB -->
+<section class="tab-content" id="tab-stats">
+  <div class="page-header">
+    <h2>Performance statistics</h2>
+    <button class="btn-secondary btn-sm" onclick="Stats.refresh()">↻ Refresh</button>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Overall</p>
+    <div class="stat-grid">
+      <div class="stat-cell"><div class="stat-label">Total trades</div><div class="stat-val" id="stat-total">0</div></div>
+      <div class="stat-cell"><div class="stat-label">Win rate</div><div class="stat-val" id="stat-winrate">—</div></div>
+      <div class="stat-cell"><div class="stat-label">Average R</div><div class="stat-val" id="stat-avgr">—</div></div>
+      <div class="stat-cell"><div class="stat-label">Net R</div><div class="stat-val" id="stat-netr">—</div></div>
+    </div>
+  </div>
+
+  <div class="card"><p class="card-label">By tier</p><div id="tier-breakdown"></div></div>
+  <div class="card"><p class="card-label">System adherence</p><div id="adherence-stats"></div></div>
+  <div class="card"><p class="card-label">Insights</p><div id="insights"></div></div>
+</section>
+
+<!-- HISTORY TAB -->
+<section class="tab-content" id="tab-history">
+  <div class="page-header">
+    <h2>Trade history</h2>
+    <button class="btn-secondary btn-sm" onclick="History.exportCSV()">↓ Export CSV</button>
+  </div>
+  <div id="history-list"></div>
+</section>
+
+<!-- PLAN TAB -->
+<section class="tab-content" id="tab-plan">
+  <div class="page-header"><h2>Trading plan reference</h2></div>
+
+  <div class="card">
+    <p class="card-label">Setup tiers</p>
+    <div class="plan-tiers">
+      <div class="plan-tier t1">
+        <div class="plan-tier-name">Tier 1 · premium</div>
+        <div class="plan-tier-desc">3-tap reversal at historical level. Level respected across multiple sessions or with weekly/monthly history. 3rd tap is your highest-conviction entry. Wait weeks for these — they run 10-20R.</div>
+      </div>
+      <div class="plan-tier t2">
+        <div class="plan-tier-name">Tier 2 · standard</div>
+        <div class="plan-tier-desc">2nd tap reversal. Asia or pre-session formed the 1st tap. London or NY hour 2-3 retest with 5M rejection wick = your entry. Bread and butter. Expect 1-2 per week.</div>
+      </div>
+      <div class="plan-tier t3">
+        <div class="plan-tier-name">Tier 3 · break/retest</div>
+        <div class="plan-tier-desc">1H candle body closes through standard level. Wait for 15-20 pip push beyond, then drop to 5M for the retest rejection holding the broken level. No compounding allowed on Tier 3.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Active trading windows (Dubai · GMT+4)</p>
+    <table class="plan-table">
+      <tr><td>10:30</td><td>Pre-London — read Asia overnight, mark zones</td></tr>
+      <tr><td class="muted">11:00 - 12:00</td><td class="muted">London hour 1 — observation only</td></tr>
+      <tr><td class="active">12:00 - 15:00</td><td class="active-text"><strong>London hours 2-4 — active window</strong></td></tr>
+      <tr><td class="muted">17:00 - 18:00</td><td class="muted">NY hour 1 — observation only</td></tr>
+      <tr><td class="active">18:00 - 21:00</td><td class="active-text"><strong>NY hours 2-4 — active window</strong></td></tr>
+      <tr><td>22:00</td><td>End of day journal — log all trades</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <p class="card-label">Risk and management</p>
+    <table class="plan-table">
+      <tr><td><strong>Risk</strong></td><td>1% account on Trade 1. Reinvest 3R on Trade 2 if Tier 1 or 2.</td></tr>
+      <tr><td><strong>SL</strong></td><td>Beyond zone edge or standard level + 5-8 pip buffer. Structure dictates.</td></tr>
+      <tr><td><strong>TP</strong></td><td>Next standard level giving 3R+ minimum. If not available, no trade.</td></tr>
+      <tr><td><strong>1R hit</strong></td><td>SL to breakeven immediately.</td></tr>
+      <tr><td><strong>2R hit</strong></td><td>SL to +1R. Close 50% at 3R.</td></tr>
+      <tr><td><strong>Runner</strong></td><td>SL at entry. Aim for next 4H or weekly level.</td></tr>
+      <tr><td><strong>Manual exit</strong></td><td>If price stalls 2-3 candles before TP, exit. Don't wait for SL.</td></tr>
+    </table>
+  </div>
+
+  <div class="card no-trade-card">
+    <p class="card-label">Hard no-trade rules</p>
+    <ul class="no-trade-list">
+      <li>No standard level inside zone</li>
+      <li>Inside tight consolidation</li>
+      <li>First hour of London or NY</li>
+      <li>Outside active windows</li>
+      <li>Target less than 3R to next level</li>
+      <li>Cloud chopping inside</li>
+      <li>1st tap of fresh zone against trend</li>
+      <li>Major news within 2 hours</li>
+      <li>Friday afternoon (gap risk)</li>
+      <li>Tier 3 without 1H body close confirmation</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Cloud sync settings</h3>
+      <button class="modal-close" onclick="Settings.close()">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-intro">Sync your trades to Google Sheets so you can access them from any device.</p>
+      <div class="field"><label>Google Apps Script URL</label><input type="text" id="setting-url" placeholder="https://script.google.com/macros/s/.../exec"></div>
+      <div class="field"><label>Secret key</label><input type="text" id="setting-key" placeholder="your-secret-key"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="Settings.test()">Test connection</button>
+        <button class="btn-primary" onclick="Settings.save()">Save</button>
+      </div>
+      <div id="settings-status" class="settings-status"></div>
+      <div class="modal-info">
+        <h4>How to set up sync</h4>
+        <ol>
+          <li>Read the <code>SETUP.md</code> file in the repo</li>
+          <li>Create a Google Sheet, deploy the Apps Script</li>
+          <li>Paste your deployment URL and secret key above</li>
+          <li>Click "Test connection" then "Save"</li>
+        </ol>
+        <p class="muted-small">Without sync, data is stored locally in this browser only.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="storage.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
